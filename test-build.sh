@@ -8,6 +8,6 @@ docker build \
     --build-arg INSTALL_NODE=false \
     --build-arg INSTALL_ZSH=false \
     --build-arg UPGRADE_PACKAGES=true \
-    --tag dc \
-    --file Dockerfile \
-    .
+    --tag devcontainer-pulumi \
+    --file ./.devcontainer/Dockerfile \
+    ./.devcontainer
