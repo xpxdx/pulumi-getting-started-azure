@@ -1,6 +1,33 @@
 {
-    "name": "pulumi",
-    "build": {
-        "dockerfile": "Dockerfile"
-    }
+	"name": "Azure Pulumi (Community)",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"args": { 
+			"INSTALL_AZURE_CLI": "true",
+			"INSTALL_DOCKER": "true",
+            "INSTALL_NODE": "false",
+            "INSTALL_ZSH": "false",
+            "UPGRADE_PACKAGES": "true"
+		}
+	},
+	"mounts": [ "source=/var/run/docker.sock,target=/var/run/docker-host.sock,type=bind" ],
+
+    // Set *default* container specific settings.json values on container create.
+	"settings": { 
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+
+	// Add the IDs of extensions you want installed when the container is created.
+	"extensions": [
+	],
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	// "postCreateCommand": "",
+
+	// Uncomment to connect as a non-root user. See https://aka.ms/vscode-remote/containers/non-root.
+	// "overrideCommand": false,
+	"remoteUser": "vscode"
 }
