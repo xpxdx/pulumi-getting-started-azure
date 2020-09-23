@@ -35,6 +35,11 @@ RUN if [ "${INSTALL_AZURE_CLI}" = "true" ]; then bash /tmp/library-scripts/azcli
     fi \
     && rm -rf /var/lib/apt/lists/*
 
+USER ${USERNAME}:${USER_GID}
+RUN bash /tmp/library-scripts/pulumi-debian.sh 
+ENV PATH="/home/${USERNAME}/.pulumi/bin:${PATH}"
+
+USER root
 ENTRYPOINT [ "/usr/local/share/docker-init.sh" ]
 CMD [ "sleep", "infinity" ]
 
