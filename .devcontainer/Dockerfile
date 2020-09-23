@@ -1,95 +1,43 @@
-FROM python:3.7-slim-stretch
+FROM mcr.microsoft.com/vscode/devcontainers/base:buster
 
-LABEL "repository"="https://github.com/pulumi/pulumi"
-LABEL "homepage"="https://pulumi.com/"
-LABEL "maintainer"="Pulumi Team <team@pulumi.com>"
+COPY library-scripts/*.sh /tmp/library-scripts/
 
-ENV GOLANG_VERSION 1.13.10
-ENV GOLANG_SHA256 8a4cbc9f2b95d114c38f6cbe94a45372d48c604b707db2057c787398dfbf8e7f
+# [Option] Install zsh
+ARG INSTALL_ZSH="true"
+# [Option] Upgrade OS packages to their latest versions
+ARG UPGRADE_PACKAGES="false"
 
-# Install deps all in one step
-RUN apt-get update -y && \
-  apt-get install -y \
-    apt-transport-https \
-    build-essential \
-    ca-certificates \
-    curl \
-    git \
-    gnupg \
-    software-properties-common \
-    wget && \
-  # Get all of the signatures we need all at once.
-  curl -fsSL https://deb.nodesource.com/gpgkey/nodesource.gpg.key  | apt-key add - && \
-  curl -fsSL https://dl.yarnpkg.com/debian/pubkey.gpg              | apt-key add - && \
-  curl -fsSL https://download.docker.com/linux/debian/gpg          | apt-key add - && \
-  curl -fsSL https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add - && \
-  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc     | apt-key add - && \
-  # IAM Authenticator for EKS
-  curl -fsSLo /usr/bin/aws-iam-authenticator https://amazon-eks.s3-us-west-2.amazonaws.com/1.10.3/2018-07-26/bin/linux/amd64/aws-iam-authenticator && \
-  chmod +x /usr/bin/aws-iam-authenticator && \
-  # Add additional apt repos all at once
-  echo "deb https://deb.nodesource.com/node_12.x $(lsb_release -cs) main"                         | tee /etc/apt/sources.list.d/node.list             && \
-  echo "deb https://dl.yarnpkg.com/debian/ stable main"                                           | tee /etc/apt/sources.list.d/yarn.list             && \
-  echo "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable"      | tee /etc/apt/sources.list.d/docker.list           && \
-  echo "deb http://packages.cloud.google.com/apt cloud-sdk-$(lsb_release -cs) main"               | tee /etc/apt/sources.list.d/google-cloud-sdk.list && \
-  echo "deb http://apt.kubernetes.io/ kubernetes-xenial main"                                     | tee /etc/apt/sources.list.d/kubernetes.list       && \
-  echo "deb [arch=amd64] https://packages.microsoft.com/repos/azure-cli/ $(lsb_release -cs) main" | tee /etc/apt/sources.list.d/azure.list            && \
-  # Install second wave of dependencies
-  apt-get update -y && \
-  apt-get install -y \
-    azure-cli \
-    docker-ce \
-    google-cloud-sdk \
-    kubectl \
-    nodejs \
-    yarn && \
-  pip install awscli --upgrade && \
-  # Clean up the lists work
-  rm -rf /var/lib/apt/lists/*
+# Install needed packages and setup non-root user. Use a separate RUN statement to add your own dependencies.
+ARG USERNAME=vscode
+ARG USER_UID=1000
+ARG USER_GID=$USER_UID
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && bash /tmp/library-scripts/common-debian.sh "${INSTALL_ZSH}" "${USERNAME}" "${USER_UID}" "${USER_GID}" "${UPGRADE_PACKAGES}" \ 
+    && apt-get install -y graphviz \
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
-# Install Go
-RUN curl -fsSLo /tmp/go.tgz https://golang.org/dl/go${GOLANG_VERSION}.linux-amd64.tar.gz; \
-    echo "${GOLANG_SHA256} /tmp/go.tgz" | sha256sum -c -; \
-    tar -C /usr/local -xzf /tmp/go.tgz; \
-    rm /tmp/go.tgz; \
-    export PATH="/usr/local/go/bin:$PATH"; \
-    go version
-ENV GOPATH /go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-    
+# [Option] Install Azure CLI
+ARG INSTALL_AZURE_CLI="true"
+# [Option] Install Docker CLI
+ARG INSTALL_DOCKER="true"
+# [Option] Install Node.js
+ARG INSTALL_NODE="true"
+ARG NODE_VERSION="lts/*"
+ENV NVM_DIR=/usr/local/share/nvm
+ENV NVM_SYMLINK_CURRENT=true \
+    PATH=${NVM_DIR}/current/bin:${PATH}
+RUN if [ "${INSTALL_AZURE_CLI}" = "true" ]; then bash /tmp/library-scripts/azcli-debian.sh; fi \
+    && if [ "${INSTALL_NODE}" = "true" ]; then bash /tmp/library-scripts/node-debian.sh "${NVM_DIR}" "${NODE_VERSION}" "${USERNAME}"; fi \
+    && if [ "${INSTALL_DOCKER}" = "true" ]; then \
+        bash /tmp/library-scripts/docker-debian.sh "true" "/var/run/docker-host.sock" "/var/run/docker.sock" "${USERNAME}"; \
+    else \
+        echo '#!/bin/bash\n"$@"' > /usr/local/share/docker-init.sh && chmod +x /usr/local/share/docker-init.sh; \
+    fi \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install .NET Core SDK
-RUN wget -q https://packages.microsoft.com/config/ubuntu/19.04/packages-microsoft-prod.deb \
-    -O packages-microsoft-prod.deb && \
-  dpkg -i packages-microsoft-prod.deb && \
-  rm packages-microsoft-prod.deb && \
-  apt-get update -y && \
-  apt-get install -y \
-    apt-transport-https \
-    dotnet-sdk-3.1
+ENTRYPOINT [ "/usr/local/share/docker-init.sh" ]
+CMD [ "sleep", "infinity" ]
 
-# Install Helm
-# Explicitly set env variables that helm reads to their defaults, so that subsequent calls to
-# helm will find the stable repo even if $HOME points to something other than /root
-# (e.g. in GitHub actions where $HOME points to /github/home).
-ENV XDG_CONFIG_HOME=/root/.config
-ENV XDG_CACHE_HOME=/root/.cache
-RUN curl -L https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash && \
-  helm repo add stable https://kubernetes-charts.storage.googleapis.com && \
-  helm repo update
-
-# Passing --build-arg PULUMI_VERSION=vX.Y.Z will use that version
-# of the SDK. Otherwise, we use whatever get.pulumi.com thinks is
-# the latest
-ARG PULUMI_VERSION=latest
-
-# Install the Pulumi SDK, including the CLI and language runtimes.
-RUN if [ "$PULUMI_VERSION" = "latest" ]; then \
-    curl -fsSL https://get.pulumi.com/ | bash; \
-  else \
-    curl -fsSL https://get.pulumi.com/ | bash -s -- --version $(echo $PULUMI_VERSION | cut -c 2-); \
-  fi && \
-  mv ~/.pulumi/bin/* /usr/bin
-
-# I think it's safe to say if we're using this mega image, we want pulumi
-ENTRYPOINT ["pulumi"]
+# [Optional] Uncomment this section to install additional OS packages.
+# RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+#     && apt-get -y install --no-install-recommends <your-package-list-here>
