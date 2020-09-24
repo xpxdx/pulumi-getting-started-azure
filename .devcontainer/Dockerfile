@@ -1,4 +1,5 @@
-FROM mcr.microsoft.com/vscode/devcontainers/base:buster
+ARG VARIANT=3.1
+FROM mcr.microsoft.com/vscode/devcontainers/dotnetcore:${VARIANT}
 
 COPY library-scripts/*.sh /tmp/library-scripts/
 
