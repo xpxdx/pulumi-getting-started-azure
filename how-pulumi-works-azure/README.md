@@ -6,6 +6,7 @@ An example adapted for Azure from the Pulumi documentation page "[How Pulumi Wor
 - [How Pulumi Works (on Azure)](#how-pulumi-works-on-azure)
   - [Prerequisites](#prerequisites)
   - [Steps](#steps)
+  - [Interesting Take-aways](#interesting-take-aways)
 <!-- /TOC -->
 
 ## Prerequisites
@@ -27,6 +28,11 @@ An example adapted for Azure from the Pulumi documentation page "[How Pulumi Wor
 3. Make changes to infrastructure resources (add a tag, for example)
 4. Update the stack: `pulumi up`.
 5. Destroy the stack: `pulumi destroy`.
+
+## Interesting Take-aways
+
+* Auto-naming by default
+* Seems faster than Terraform (due to no up-front refresh?)
 
 [1]: https://www.pulumi.com/docs/intro/concepts/how-pulumi-works/
 [2]: https://www.pulumi.com/docs/get-started/azure/
