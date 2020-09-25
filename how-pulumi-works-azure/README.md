@@ -1,6 +1,6 @@
 # How Pulumi Works (on Azure)
 
-An example adapted for Azure from the Pulumi documentation page "[How Pulumi Works][1]" and the "Get Started - Azure[2]" guide. A toy project to demonstrate basic developer workflow. 
+An example adapted for Azure from the Pulumi documentation page "[How Pulumi Works][1]" and the "[Get Started - Azure][2]" guide. A toy project to demonstrate basic developer workflow. 
 
 <!-- TOC -->
 - [How Pulumi Works (on Azure)](#how-pulumi-works-on-azure)
