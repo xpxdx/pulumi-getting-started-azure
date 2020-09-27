@@ -12,6 +12,7 @@ variables:
   
 stages:
   - stage: Build
+
     jobs: 
       - job: Preview
 
