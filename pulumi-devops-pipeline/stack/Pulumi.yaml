@@ -1,0 +1,3 @@
+name: AzureCSharp.DevOpsPipeline
+runtime: dotnet
+description: An example running Pulumi in an Azure DevOps Pipeline
