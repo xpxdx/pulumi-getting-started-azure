@@ -1,16 +1,18 @@
 name: 1.0.$(Rev:r)
 
 trigger:
-- master
+- main
 
 pr:
-  - master
+  - main
   - development
 
+variables:
+  - group: pulumi-access-token
+  
 stages:
   - stage: Build
-    variables:
-      - group: pulumi-access-token
+
     jobs: 
       - job: Preview
 
