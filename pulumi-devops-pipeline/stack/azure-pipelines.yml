@@ -7,10 +7,11 @@ pr:
   - master
   - development
 
+variables:
+  - group: pulumi-access-token
+  
 stages:
   - stage: Build
-    variables:
-      - group: pulumi-access-token
     jobs: 
       - job: Preview
 
