@@ -22,5 +22,10 @@ steps:
     echo See https://aka.ms/yaml
   displayName: 'Run a multi-line script'
 
-- script: exit 1
-  displayName: 'Failing task'
+- script: exit 0
+  displayName: 'Fixed this task'
+
+- script: |
+    echo 'Fixed it!'
+    exit 0
+  displayName: 'New task'
