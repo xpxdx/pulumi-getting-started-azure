@@ -66,7 +66,7 @@ class MyStack : Stack
             {
                 Publisher = "Canonical",
                 Offer = "UbuntuServer",
-                Sku = "20.04.0-LTS",
+                Sku = "18_04-lts-gen2",
                 Version = "latest",
             },
 
