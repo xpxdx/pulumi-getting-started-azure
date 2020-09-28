@@ -16,35 +16,29 @@ variables:
   - name: working-directory
     value: 'pulumi-devops-pipeline/stack'
 
-stages:
-  - stage: Build
+pool:
+  vmImage: 'ubuntu-latest'
 
-    jobs: 
-      - job: Preview
+steps:
+  - checkout: self
+    fetchDepth: 1
 
-        pool:
-          vmImage: 'ubuntu-latest'
+  - task: Pulumi@1
+    displayName: 'Preview Infrastructure Changes'
+    condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Manual'))
+    inputs:
+      azureSubscription: $(azure-subscription)
+      command: 'preview'
+      args: '--diff --refresh --non-interactive'
+      cwd: $(working-directory)
+      stack: $(stack-name)
 
-        steps:
-          - checkout: self
-            fetchDepth: 1
-
-          - task: Pulumi@1
-            displayName: 'Preview Infrastructure Changes'
-            condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Manual'))
-            inputs:
-              azureSubscription: $(azure-subscription)
-              command: 'preview'
-              args: '--diff --refresh --non-interactive'
-              cwd: $(working-directory)
-              stack: $(stack-name)
-
-          - task: Pulumi@1
-            displayName: 'Deploy Infrastructure Changes'
-            condition: or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'BatchedCI'))
-            inputs:
-              azureSubscription: $(azure-subscription)
-              command: 'up'
-              args: '--yes --diff --refresh --non-interactive'
-              cwd: $(working-directory)
-              stack: $(stack-name)
+  - task: Pulumi@1
+    displayName: 'Deploy Infrastructure Changes'
+    condition: or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'BatchedCI'))
+    inputs:
+      azureSubscription: $(azure-subscription)
+      command: 'up'
+      args: '--yes --diff --refresh --non-interactive'
+      cwd: $(working-directory)
+      stack: $(stack-name)
