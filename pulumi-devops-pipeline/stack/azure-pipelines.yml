@@ -1,7 +1,10 @@
 name: 1.0.$(Rev:r)
 
 trigger:
-- main
+  batch: true
+  branches:
+    include:
+      - main
 
 pr:
   - main
