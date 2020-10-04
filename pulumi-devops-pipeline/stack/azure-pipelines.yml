@@ -38,10 +38,10 @@ steps:
 
   - task: Pulumi@1
     displayName: 'Deploy Infrastructure Changes'
-    condition: or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'BatchedCI'))
+    condition: or(or(eq(variables['Build.Reason'], 'IndividualCI'), eq(variables['Build.Reason'], 'BatchedCI')),and(eq(variables['Build.Reason'], 'Manual'),eq(variables['manual-deploy'], true)))
     inputs:
       azureSubscription: $(azure-subscription)
       command: 'up'
-      args: '--yes --diff --refresh --non-interactive'
+      args: '--yes --diff --refresh --non-interactive --skip-preview'
       cwd: $(working-directory)
       stack: $(stack-name)
