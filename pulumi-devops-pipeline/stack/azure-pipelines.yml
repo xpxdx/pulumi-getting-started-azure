@@ -28,7 +28,7 @@ steps:
 
   - task: Pulumi@1
     displayName: 'Preview Infrastructure Changes'
-    condition: or(eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.Reason'], 'Manual'))
+    condition: or(eq(variables['Build.Reason'], 'PullRequest'), and(eq(variables['Build.Reason'], 'Manual'), ne(variables['manual-deploy'], true)))
     inputs:
       azureSubscription: $(azure-subscription)
       command: 'preview'

@@ -38,6 +38,7 @@ COPY library-scripts/pulumi-debian.sh /tmp/library-scripts/
 RUN bash /tmp/library-scripts/pulumi-debian.sh 
 ENV PATH="/home/${USERNAME}/.pulumi/bin:${PATH}"
 RUN pulumi plugin install resource azure v3.23.0
+COPY ~/.gitconfig /home/${USERNAME}/.gitconfig
 RUN git config --global gpg.program `which gpg`
 
 COPY library-scripts/*.sh /tmp/library-scripts/
