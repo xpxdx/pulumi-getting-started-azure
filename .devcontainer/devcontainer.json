@@ -21,7 +21,8 @@
 	// Add the IDs of extensions you want installed when the container is created.
 	"extensions": [
 		"ms-azure-devops.azure-pipelines",
-		"ms-dotnettools.csharp"
+		"ms-dotnettools.csharp",
+		"mhutchie.git-graph"
 	],
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
