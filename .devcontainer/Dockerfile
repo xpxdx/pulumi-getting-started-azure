@@ -24,13 +24,13 @@ ARG INSTALL_DOCKER="true"
 COPY library-scripts/azcli-debian.sh /tmp/library-scripts/
 COPY library-scripts/docker-debian.sh /tmp/library-scripts/
 
-RUN if [ "${INSTALL_AZURE_CLI}" = "true" ]; then bash /tmp/library-scripts/azcli-debian.sh; fi
-RUN if [ "${INSTALL_DOCKER}" = "true" ]; then \
+RUN if [ "${INSTALL_AZURE_CLI}" = "true" ]; then bash /tmp/library-scripts/azcli-debian.sh; fi \
+    && if [ "${INSTALL_DOCKER}" = "true" ]; then \
         bash /tmp/library-scripts/docker-debian.sh "true" "/var/run/docker-host.sock" "/var/run/docker.sock" "${USERNAME}"; \
     else \
         echo '#!/bin/bash\n"$@"' > /usr/local/share/docker-init.sh && chmod +x /usr/local/share/docker-init.sh; \
-    fi
-RUN rm -rf /var/lib/apt/lists/*
+    fi \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install Pulumi
 USER ${USERNAME}:${USER_GID}
@@ -38,8 +38,8 @@ COPY library-scripts/pulumi-debian.sh /tmp/library-scripts/
 RUN bash /tmp/library-scripts/pulumi-debian.sh 
 ENV PATH="/home/${USERNAME}/.pulumi/bin:${PATH}"
 RUN pulumi plugin install resource azure v3.23.0
-COPY ~/.gitconfig /home/${USERNAME}/.gitconfig
-RUN git config --global gpg.program `which gpg`
+# COPY ~/.gitconfig /home/${USERNAME}/.gitconfig
+# RUN git config --global gpg.program `which gpg`
 
 COPY library-scripts/*.sh /tmp/library-scripts/
 
