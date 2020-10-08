@@ -60,24 +60,25 @@ steps:
     inputs:
       targetType: 'inline'
       script: |
+        #!/usr/bin/env bash
         set -e -x
-        
+
         # Download and install pulumi
         curl -fsSL https://get.pulumi.com/ | bash 
         export PATH=$HOME/.pulumi/bin:$PATH
-        
+
         # Login into pulumi. This will require the AZURE_STORAGE_ACCOUNT
         # environment variable.
         pulumi login -c azblob://${AZURE_STORAGE_CONTAINER}
         pulumi stack select $(stack-name)
 
         COMMON_ARGS="--diff --refresh --non-interactive"
-        case ${BUILD_REASON} in
-          PullRequest)
-              pulumi preview ${COMMON_ARGS}
-            ;;
-          BuildCompletion|BatchedCI)
-              pulumi up --yes --skip-preview ${COMMON_ARGS}
-            ;;
-        esac
+        if [ "${BUILD_REASON}" = "PullRequest" ] || { [ "${BUILD_REASON}" = "Manual" ] && [ "${MANUAL_DEPLOY}" != "true" ]; }; then
+            pulumi preview ${COMMON_ARGS}
+        elif [ "${BUILD_REASON}" = "IndividualCI" ] || [ "${BUILD_REASON}" = "BatchedCI" ] || { [ "${BUILD_REASON}" = "Manual" ] && [ "${MANUAL_DEPLOY}" = "true" ]; }; then
+            pulumi up --yes --skip-preview ${COMMON_ARGS}
+        else
+            echo "##vso[task.logissue type=error]No run conditions matched."
+            exit 1
+        fi
       workingDirectory: '$(working-directory)'
