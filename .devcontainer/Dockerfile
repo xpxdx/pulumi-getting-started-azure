@@ -16,6 +16,10 @@ RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
     && apt-get install -y graphviz \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && export DEBIAN_FRONTEND=noninteractive \
+    && apt-get install -y uuid-runtime \
+    && apt-get clean -y && rm -rf /var/lib/apt/lists/*
+
 # [Option] Install Azure CLI
 ARG INSTALL_AZURE_CLI="true"
 # [Option] Install Docker CLI
