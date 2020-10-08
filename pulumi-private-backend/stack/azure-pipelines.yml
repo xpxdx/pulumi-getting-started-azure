@@ -1,0 +1,83 @@
+name: 1.0.$(Rev:r)
+
+trigger:
+  batch: true
+  branches:
+    include:
+      - main
+  paths:
+    include:
+      - 'pulumi-private-backend/stack'
+
+pr:
+  - main
+  - development
+
+variables:
+  - group: pulumi-azure-backend
+  - name: azure-subscription
+    value: 'Azure - Personal'
+  - name: stack-name
+    value: 'azcs-privatebackend-dev'
+  - name: working-directory
+    value: 'pulumi-private-backend/stack'
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - checkout: self
+    fetchDepth: 1
+
+  - task: AzureCLI@2
+    displayName: 'Generate Storage Key'
+    inputs:
+      azureSubscription: 'Azure - Personal'
+      scriptType: 'bash'
+      scriptLocation: 'scriptPath'
+      scriptPath: '$(working-directory)/scripts/generate-storage-keys.sh'
+      failOnStandardError: true
+
+  - task: AzureCLI@2
+    displayName: 'Environment Setup'
+    inputs:
+      azureSubscription: 'Azure - Personal'
+      scriptType: 'bash'
+      scriptLocation: 'scriptPath'
+      scriptPath: '$(working-directory)/scripts/environment-setup.sh'
+      addSpnToEnvironment: true
+      failOnStandardError: true
+  
+  - task: Bash@3
+    displayName: 'Pulumi Run'
+    env:
+      AZURE_STORAGE_SAS_TOKEN: $(AZURE_STORAGE_TOKEN)
+      PULUMI_CONFIG_PASSPHRASE: $(PULUMI_CONFIG_PASSPHRASE)
+      ARM_CLIENT_ID: $(AZURE_CLIENT_ID)
+      ARM_CLIENT_SECRET: $(AZURE_CLIENT_SECRET)
+      ARM_SUBSCRIPTION_ID: $(AZURE_SUBSCRIPTION_ID)
+      ARM_TENANT_ID: $(AZURE_TENANT_ID)
+    inputs:
+      targetType: 'inline'
+      script: |
+        set -e -x
+        
+        # Download and install pulumi
+        curl -fsSL https://get.pulumi.com/ | bash 
+        export PATH=$HOME/.pulumi/bin:$PATH
+        
+        # Login into pulumi. This will require the AZURE_STORAGE_ACCOUNT
+        # environment variable.
+        pulumi login -c azblob://${AZURE_STORAGE_CONTAINER}
+        pulumi stack select $(stack-name)
+
+        COMMON_ARGS="--diff --refresh --non-interactive"
+        case ${BUILD_REASON} in
+          PullRequest)
+              pulumi preview ${COMMON_ARGS}
+            ;;
+          BuildCompletion|BatchedCI)
+              pulumi up --yes --skip-preview ${COMMON_ARGS}
+            ;;
+        esac
+      workingDirectory: '$(working-directory)'
