@@ -54,7 +54,7 @@ class MyStack : Stack
             Size = "Standard_DS1_v2",
             ComputerName = $"vm-{suffix}",
             AdminUsername = "plankton",
-            AdminPassword = "password1234!",
+            AdminPassword = "Password1234!",
             DisablePasswordAuthentication = false,
             OsDisk = new LinuxVirtualMachineOsDiskArgs
             {
