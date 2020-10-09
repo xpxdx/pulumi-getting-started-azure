@@ -10,7 +10,7 @@ class MyStack : Stack
 {
     public MyStack()
     {
-        var suffix = "pulumi-devops";
+        var suffix = "pulumi-devops-demo";
 
         // Create an Azure Resource Group
         var resourceGroup = new ResourceGroup($"rg-{suffix}");
