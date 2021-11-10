@@ -23,7 +23,7 @@ variables:
     value: 'pulumi-devops-pipeline/stack'
 
 pool:
-  vmImage: 'ubuntu-latest'
+  name: 'MyAgentPool'
 
 steps:
   - checkout: self
