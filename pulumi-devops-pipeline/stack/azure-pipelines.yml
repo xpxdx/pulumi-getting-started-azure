@@ -16,7 +16,7 @@ pr:
 variables:
   - group: pulumi-access-token
   - name: azure-subscription
-    value: 'Azure - Personal'
+    value: 'temp-poc-app-service-from-container-connection'
   - name: stack-name
     value: 'jamesrcounts/AzureCSharp.DevOpsPipeline/azcs-devopspipeline-dev'
   - name: working-directory
