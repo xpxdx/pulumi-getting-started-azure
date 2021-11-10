@@ -1,0 +1,4 @@
+config:
+  azure-native:location: EashUS
+  azure:location: EastUS
+  pulumi:template: azure-csharp
