@@ -19,7 +19,9 @@ variables:
     value: 'temp-poc-app-service-from-container-connection'
   - name: working-directory
     value: 'pulumi-devops-pipeline/stack'
-
+  - name: stack-name
+    value: 'xpxdx/pulumi-devops-pipeline/dev'
+    
 pool:
   name: 'MyAgentPool'
 
@@ -35,7 +37,7 @@ steps:
       command: 'preview'
       args: '--diff --refresh --non-interactive'
       cwd: $(working-directory)
-      stack: dev
+      stack: $(stack-name)
 
   - task: Pulumi@1
     displayName: 'Deploy Infrastructure Changes'
@@ -45,4 +47,4 @@ steps:
       command: 'up'
       args: '--yes --diff --refresh --non-interactive --skip-preview'
       cwd: $(working-directory)
-      stack: dev
+      stack: $(stack-name)
