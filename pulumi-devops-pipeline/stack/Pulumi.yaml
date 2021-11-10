@@ -1,3 +1,4 @@
 name: pulumi-devops-pipeline
 runtime: dotnet
 description: A minimal Azure Native C# Pulumi program
+azure:location EastUS
