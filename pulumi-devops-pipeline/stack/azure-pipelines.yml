@@ -17,8 +17,6 @@ variables:
   - group: pulumi-access-token
   - name: azure-subscription
     value: 'temp-poc-app-service-from-container-connection'
-  - name: stack-name
-    value: 'jamesrcounts/AzureCSharp.DevOpsPipeline/azcs-devopspipeline-dev'
   - name: working-directory
     value: 'pulumi-devops-pipeline/stack'
 
@@ -37,7 +35,7 @@ steps:
       command: 'preview'
       args: '--diff --refresh --non-interactive'
       cwd: $(working-directory)
-      stack: $(stack-name)
+      stack: dev
 
   - task: Pulumi@1
     displayName: 'Deploy Infrastructure Changes'
@@ -47,4 +45,4 @@ steps:
       command: 'up'
       args: '--yes --diff --refresh --non-interactive --skip-preview'
       cwd: $(working-directory)
-      stack: $(stack-name)
+      stack: dev
